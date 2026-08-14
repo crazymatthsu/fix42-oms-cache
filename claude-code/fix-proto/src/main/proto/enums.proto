@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package fix42;
+
+option java_multiple_files = true;
+option java_package = "com.fix42.oms.proto";
+option java_outer_classname = "FixEnums";
+
+// -----------------------------------------------------------------------------
+// FIX 4.2 enumerations used by the typed order state.
+//
+// proto3 rules honored here:
+//   * every enum's first value is the zero-valued *_UNSPECIFIED default;
+//   * enum value NAMES share C++-style scope across the whole file, so each set
+//     is prefixed (SIDE_, ORD_STATUS_, EXEC_TYPE_, ...) to avoid collisions
+//     (OrdStatus and ExecType would otherwise both define NEW / FILLED / ...).
+//
+// The numeric enum values are SEMANTIC ordinals, NOT the FIX character codes.
+// The single-character FIX wire codes (e.g. OrdStatus '0','A','E') are mapped
+// to/from these enums in Java (see com.fix42.oms.dict.FixCodes). Keeping them
+// separate avoids baking ASCII into the schema and keeps the API readable.
+// -----------------------------------------------------------------------------
+
+// Tag 54 (Side)
+enum Side {
+  SIDE_UNSPECIFIED = 0;
+  SIDE_BUY = 1;                 // '1'
+  SIDE_SELL = 2;                // '2'
+  SIDE_BUY_MINUS = 3;           // '3'
+  SIDE_SELL_PLUS = 4;           // '4'
+  SIDE_SELL_SHORT = 5;          // '5'
+  SIDE_SELL_SHORT_EXEMPT = 6;   // '6'
+  SIDE_UNDISCLOSED = 7;         // '7'
+  SIDE_CROSS = 8;               // '8'
+  SIDE_CROSS_SHORT = 9;         // '9'
+}
+
+// Tag 40 (OrdType)
+enum OrdType {
+  ORD_TYPE_UNSPECIFIED = 0;
+  ORD_TYPE_MARKET = 1;              // '1'
+  ORD_TYPE_LIMIT = 2;               // '2'
+  ORD_TYPE_STOP = 3;                // '3'
+  ORD_TYPE_STOP_LIMIT = 4;          // '4'
+  ORD_TYPE_MARKET_ON_CLOSE = 5;     // '5'
+  ORD_TYPE_WITH_OR_WITHOUT = 6;     // '6'
+  ORD_TYPE_LIMIT_OR_BETTER = 7;     // '7'
+  ORD_TYPE_LIMIT_WITH_OR_WITHOUT = 8; // '8'
+  ORD_TYPE_ON_BASIS = 9;            // '9'
+  ORD_TYPE_ON_CLOSE = 10;           // 'A'
+  ORD_TYPE_LIMIT_ON_CLOSE = 11;     // 'B'
+  ORD_TYPE_PEGGED = 12;             // 'P'
+}
+
+// Tag 59 (TimeInForce)
+enum TimeInForce {
+  TIME_IN_FORCE_UNSPECIFIED = 0;
+  TIME_IN_FORCE_DAY = 1;              // '0'
+  TIME_IN_FORCE_GTC = 2;              // '1'  Good Till Cancel
+  TIME_IN_FORCE_OPG = 3;              // '2'  At the Opening
+  TIME_IN_FORCE_IOC = 4;              // '3'  Immediate Or Cancel
+  TIME_IN_FORCE_FOK = 5;              // '4'  Fill Or Kill
+  TIME_IN_FORCE_GTX = 6;              // '5'  Good Till Crossing
+  TIME_IN_FORCE_GTD = 7;              // '6'  Good Till Date
+}
+
+// Tag 39 (OrdStatus) - lifecycle state of the order.
+enum OrdStatus {
+  ORD_STATUS_UNSPECIFIED = 0;
+  ORD_STATUS_NEW = 1;                 // '0'
+  ORD_STATUS_PARTIALLY_FILLED = 2;    // '1'
+  ORD_STATUS_FILLED = 3;              // '2'
+  ORD_STATUS_DONE_FOR_DAY = 4;        // '3'
+  ORD_STATUS_CANCELED = 5;            // '4'
+  ORD_STATUS_REPLACED = 6;            // '5'
+  ORD_STATUS_PENDING_CANCEL = 7;      // '6'
+  ORD_STATUS_STOPPED = 8;             // '7'
+  ORD_STATUS_REJECTED = 9;            // '8'
+  ORD_STATUS_SUSPENDED = 10;          // '9'
+  ORD_STATUS_PENDING_NEW = 11;        // 'A'
+  ORD_STATUS_CALCULATED = 12;         // 'B'
+  ORD_STATUS_EXPIRED = 13;            // 'C'
+  ORD_STATUS_ACCEPTED_FOR_BIDDING = 14; // 'D'
+  ORD_STATUS_PENDING_REPLACE = 15;    // 'E'
+}
+
+// Tag 150 (ExecType) - the reason this ExecutionReport was generated (FIX 4.2).
+enum ExecType {
+  EXEC_TYPE_UNSPECIFIED = 0;
+  EXEC_TYPE_NEW = 1;                  // '0'
+  EXEC_TYPE_PARTIAL_FILL = 2;         // '1'
+  EXEC_TYPE_FILL = 3;                 // '2'
+  EXEC_TYPE_DONE_FOR_DAY = 4;         // '3'
+  EXEC_TYPE_CANCELED = 5;             // '4'
+  EXEC_TYPE_REPLACED = 6;             // '5'
+  EXEC_TYPE_PENDING_CANCEL = 7;       // '6'
+  EXEC_TYPE_STOPPED = 8;              // '7'
+  EXEC_TYPE_REJECTED = 9;             // '8'
+  EXEC_TYPE_SUSPENDED = 10;           // '9'
+  EXEC_TYPE_PENDING_NEW = 11;         // 'A'
+  EXEC_TYPE_CALCULATED = 12;          // 'B'
+  EXEC_TYPE_EXPIRED = 13;             // 'C'
+  EXEC_TYPE_RESTATED = 14;            // 'D'
+  EXEC_TYPE_PENDING_REPLACE = 15;     // 'E'
+}
+
+// Tag 20 (ExecTransType) - FIX 4.2 transaction type distinguishing a new
+// execution from a cancel/correction of a previously reported one.
+enum ExecTransType {
+  EXEC_TRANS_TYPE_NEW = 0;            // '0' (also the proto3 default)
+  EXEC_TRANS_TYPE_CANCEL = 1;         // '1'
+  EXEC_TRANS_TYPE_CORRECT = 2;        // '2'
+  EXEC_TRANS_TYPE_STATUS = 3;         // '3'
+}
+
+// Tag 434 (CxlRejResponseTo) - which request an OrderCancelReject answers.
+enum CxlRejResponseTo {
+  CXL_REJ_RESPONSE_TO_UNSPECIFIED = 0;
+  CXL_REJ_RESPONSE_TO_ORDER_CANCEL_REQUEST = 1;         // '1'
+  CXL_REJ_RESPONSE_TO_ORDER_CANCEL_REPLACE_REQUEST = 2; // '2'
+}

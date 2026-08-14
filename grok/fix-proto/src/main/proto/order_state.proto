@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package fix42.oms;
+
+option java_package = "com.fix42.oms.proto";
+option java_multiple_files = true;
+option java_outer_classname = "OrderStateProto";
+
+message OrderState {
+  string order_key = 1;
+  optional string cl_ord_id = 2;
+  optional string orig_cl_ord_id = 3;
+  repeated string cl_ord_id_history = 4;
+  optional string order_id = 5;
+  optional string secondary_order_id = 6;
+  optional string account = 7;
+  optional string symbol = 8;
+  optional string security_id = 9;
+  optional string side = 10;
+  optional string ord_type = 11;
+  optional string time_in_force = 12;
+  optional string ord_status = 13;
+  optional string exec_type = 14;
+  optional string exec_trans_type = 15;
+  optional string last_exec_id = 16;
+  optional double order_qty = 17;
+  optional double cum_qty = 18;
+  optional double leaves_qty = 19;
+  optional double last_qty = 20;
+  optional double last_px = 21;
+  optional double avg_px = 22;
+  optional double price = 23;
+  optional double stop_px = 24;
+  optional string parent_order_id = 25;
+  optional string parent_cl_ord_id = 26;
+  repeated string child_order_keys = 27;
+  optional string transact_time = 28;
+  optional string last_msg_type = 29;
+  int64 last_update_epoch_ms = 30;
+  int32 version = 31;
+  optional string text = 32;
+  optional string ord_rej_reason = 33;
+  optional string cxl_rej_reason = 34;
+  optional string cxl_rej_response_to = 35;
+  optional string dk_reason = 36;
+  bool pending_cancel = 37;
+  bool pending_replace = 38;
+  bool dk_trade = 39;
+  repeated string seen_exec_ids = 40;
+}

@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package fix42;
+
+import "fix.proto";
+import "order_state.proto";
+
+option java_multiple_files = true;
+option java_package = "com.fix42.oms.proto";
+option java_outer_classname = "PersistenceProto";
+
+// -----------------------------------------------------------------------------
+// On-disk persistence formats for :oms-persist.
+//
+// The cache is DERIVED state: every OrderState is a deterministic fold of the
+// message stream (given message order and arrival timestamps). Recovery is
+// therefore "restore latest snapshot, replay the journal tail" — both payloads
+// defined here. The framing around these payloads (magic, length, CRC32) is
+// written by the Java layer; see docs/07-persistence-and-recovery.md.
+// -----------------------------------------------------------------------------
+
+// One journaled input message. `sequence` is a strictly-increasing, gap-free
+// per-cache counter assigned at process() time; `arrival_epoch_millis` is the
+// wall-clock time recorded on the live path and re-injected on replay so the
+// recovered OrderState timestamps equal the pre-crash state (OrderState.equals();
+// serialized bytes are not canonical because proto map fields have no defined order).
+message JournalRecord {
+  uint64 sequence = 1;
+  int64 arrival_epoch_millis = 2;
+  FixMessage message = 3;
+}
+
+// A set of internal chain ids (value type for the set-valued index maps).
+message ChainIdSet {
+  repeated string chain_ids = 1;
+}
+
+// Full checkpoint of an InMemoryOrderCache.
+//
+// The identifier indexes are persisted VERBATIM rather than re-derived from the
+// states: clOrdId index entries can hold past OrigClOrdID(41) values that are
+// not recoverable from the final OrderState (mid-stream joins), so re-deriving
+// would silently drop lookup keys.
+message CacheSnapshot {
+  // Journal high-water mark: every record with sequence <= this value is
+  // reflected in `states`; replay resumes strictly after it.
+  uint64 last_applied_sequence = 1;
+  int64 created_epoch_millis = 2;
+  // Internal chain-id counter, restored so post-recovery chains don't collide.
+  uint64 chain_seq = 3;
+
+  map<string, OrderState> states = 4;          // chainId -> latest state
+  map<string, string> order_id_index = 5;      // OrderID(37)  -> chainId
+  map<string, string> cl_ord_id_index = 6;     // ClOrdID(11)/OrigClOrdID(41) -> chainId
+  map<string, string> exec_id_index = 7;       // ExecID(17)   -> chainId
+  map<string, ChainIdSet> account_index = 8;   // Account(1)   -> chainIds
+  map<string, ChainIdSet> symbol_index = 9;    // Symbol(55)   -> chainIds
+  map<string, ChainIdSet> parent_index = 10;   // parentId     -> child chainIds
+
+  // ----- Format version + configuration fingerprint (fields 11+) -----
+  // The fold is deterministic only under the SAME configuration. Recovery fails
+  // loudly on a mismatch instead of silently diverging. format_version 0 (absent)
+  // is treated as version 1 without a fingerprint.
+  int32 format_version = 11;   // currently 1; recovery refuses versions it doesn't know
+  int32 history_cap = 12;      // CacheConfig.historyCap of the exporting instance
+  bool roll_up_parents = 13;   // CacheConfig.rollUpParents of the exporting instance
+  int32 parent_link_tag = 14;  // DefaultParentLinkResolver tag, or -1 for a custom resolver
+}

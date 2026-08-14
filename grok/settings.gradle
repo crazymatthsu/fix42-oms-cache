@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'fix42-oms-cache'
+
+include 'fix-proto'
+include 'fix-codec'
+include 'oms-cache'

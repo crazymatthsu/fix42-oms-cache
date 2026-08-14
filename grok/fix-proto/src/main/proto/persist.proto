@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package fix42.oms;
+
+option java_package = "com.fix42.oms.proto";
+option java_multiple_files = true;
+option java_outer_classname = "PersistProto";
+
+import "order_state.proto";
+
+message WalRecord {
+  int64 seq = 1;
+  int64 epoch_ms = 2;
+  string order_key = 3;
+  string raw_fix = 4;
+  string msg_type = 5;
+  optional string source_cursor = 6;
+}
+
+message PersistedOrder {
+  OrderState state = 1;
+  repeated string history = 2;
+}
+
+message Snapshot {
+  int64 up_to_seq = 1;
+  int64 taken_epoch_ms = 2;
+  repeated PersistedOrder orders = 3;
+  optional string source_cursor = 4;
+}
+
+message Checkpoint {
+  int64 last_seq = 1;
+  optional string source_cursor = 2;
+}

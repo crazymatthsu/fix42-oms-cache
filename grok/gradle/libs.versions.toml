@@ -1,0 +1,14 @@
+[versions]
+junit = "5.11.4"
+assertj = "3.27.3"
+protobuf = "4.29.3"
+protobufPlugin = "0.9.4"
+
+[libraries]
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version = "1.11.4" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+
+[plugins]
+protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }

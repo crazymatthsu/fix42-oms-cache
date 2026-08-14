@@ -1,0 +1,179 @@
+syntax = "proto3";
+
+package fix42.oms;
+
+option java_package = "com.fix42.oms.proto";
+option java_multiple_files = true;
+option java_outer_classname = "FixMessagesProto";
+
+import "fix.proto";
+import "enums.proto";
+
+message Alloc {
+  optional string alloc_account = 1;
+  optional double alloc_shares = 2;
+  optional double alloc_price = 3;
+  repeated FixField extra = 4;
+}
+
+message ContraBroker {
+  optional string contra_broker = 1;
+  optional string contra_trader = 2;
+  optional double contra_trade_qty = 3;
+  optional string contra_trade_time = 4;
+  repeated FixField extra = 5;
+}
+
+message MiscFee {
+  optional double misc_fee_amt = 1;
+  optional string misc_fee_curr = 2;
+  optional string misc_fee_type = 3;
+  repeated FixField extra = 4;
+}
+
+message TradingSession {
+  optional string trading_session_id = 1;
+  repeated FixField extra = 2;
+}
+
+message NewOrderSingle {
+  FixHeader header = 1;
+  optional string cl_ord_id = 2;
+  optional string account = 3;
+  optional string handl_inst = 4;
+  optional string symbol = 5;
+  optional string security_id = 6;
+  optional string side = 7;
+  optional string transact_time = 8;
+  optional double order_qty = 9;
+  optional string ord_type = 10;
+  optional double price = 11;
+  optional double stop_px = 12;
+  optional string time_in_force = 13;
+  optional string text = 14;
+  optional string parent_order_id = 15;
+  optional string parent_cl_ord_id = 16;
+  repeated Alloc allocs = 17;
+  repeated TradingSession trading_sessions = 18;
+  repeated FixField extra = 19;
+  optional string raw = 20;
+}
+
+message ExecutionReport {
+  FixHeader header = 1;
+  optional string cl_ord_id = 2;
+  optional string orig_cl_ord_id = 3;
+  optional string order_id = 4;
+  optional string secondary_order_id = 5;
+  optional string exec_id = 6;
+  optional string exec_ref_id = 7;
+  optional string exec_trans_type = 8;
+  optional string exec_type = 9;
+  optional string ord_status = 10;
+  optional string account = 11;
+  optional string symbol = 12;
+  optional string security_id = 13;
+  optional string side = 14;
+  optional double order_qty = 15;
+  optional string ord_type = 16;
+  optional double price = 17;
+  optional double stop_px = 18;
+  optional string time_in_force = 19;
+  optional double last_shares = 20;
+  optional double last_px = 21;
+  optional double leaves_qty = 22;
+  optional double cum_qty = 23;
+  optional double avg_px = 24;
+  optional string transact_time = 25;
+  optional string text = 26;
+  optional string ord_rej_reason = 27;
+  optional string parent_order_id = 28;
+  optional string parent_cl_ord_id = 29;
+  repeated ContraBroker contra_brokers = 30;
+  repeated MiscFee misc_fees = 31;
+  repeated Alloc allocs = 32;
+  repeated FixField extra = 33;
+  optional string raw = 34;
+}
+
+message OrderCancelReject {
+  FixHeader header = 1;
+  optional string cl_ord_id = 2;
+  optional string orig_cl_ord_id = 3;
+  optional string order_id = 4;
+  optional string ord_status = 5;
+  optional string cxl_rej_response_to = 6;
+  optional string cxl_rej_reason = 7;
+  optional string account = 8;
+  optional string text = 9;
+  optional string transact_time = 10;
+  repeated FixField extra = 11;
+  optional string raw = 12;
+}
+
+message OrderCancelRequest {
+  FixHeader header = 1;
+  optional string cl_ord_id = 2;
+  optional string orig_cl_ord_id = 3;
+  optional string order_id = 4;
+  optional string account = 5;
+  optional string symbol = 6;
+  optional string side = 7;
+  optional double order_qty = 8;
+  optional string transact_time = 9;
+  optional string text = 10;
+  optional string parent_order_id = 11;
+  optional string parent_cl_ord_id = 12;
+  repeated FixField extra = 13;
+  optional string raw = 14;
+}
+
+message OrderCancelReplaceRequest {
+  FixHeader header = 1;
+  optional string cl_ord_id = 2;
+  optional string orig_cl_ord_id = 3;
+  optional string order_id = 4;
+  optional string account = 5;
+  optional string handl_inst = 6;
+  optional string symbol = 7;
+  optional string side = 8;
+  optional string transact_time = 9;
+  optional double order_qty = 10;
+  optional string ord_type = 11;
+  optional double price = 12;
+  optional double stop_px = 13;
+  optional string time_in_force = 14;
+  optional string text = 15;
+  optional string parent_order_id = 16;
+  optional string parent_cl_ord_id = 17;
+  repeated Alloc allocs = 18;
+  repeated TradingSession trading_sessions = 19;
+  repeated FixField extra = 20;
+  optional string raw = 21;
+}
+
+message OrderStatusRequest {
+  FixHeader header = 1;
+  optional string cl_ord_id = 2;
+  optional string order_id = 3;
+  optional string account = 4;
+  optional string symbol = 5;
+  optional string side = 6;
+  repeated FixField extra = 7;
+  optional string raw = 8;
+}
+
+message DontKnowTrade {
+  FixHeader header = 1;
+  optional string order_id = 2;
+  optional string exec_id = 3;
+  optional string dk_reason = 4;
+  optional string symbol = 5;
+  optional string side = 6;
+  optional double order_qty = 7;
+  optional double last_shares = 8;
+  optional double last_px = 9;
+  optional string text = 10;
+  repeated FixField extra = 11;
+  optional string raw = 12;
+}

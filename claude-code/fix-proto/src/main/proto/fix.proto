@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package fix42;
+
+option java_multiple_files = true;
+option java_package = "com.fix42.oms.proto";
+option java_outer_classname = "FixProto";
+
+// -----------------------------------------------------------------------------
+// Generic, lossless FIX wire model.
+//
+// A FIX message is fundamentally an ordered sequence of `tag=value` fields
+// delimited by SOH (0x01). `FixMessage` preserves that exact order (header,
+// body, trailer) so that parse -> serialize is a faithful round-trip and any
+// repeating-group structure is retained positionally. Typed interpretation of
+// groups is layered on top by the codec's data dictionary; the wire model
+// itself stays deliberately dumb and complete.
+// -----------------------------------------------------------------------------
+
+// A single FIX field: a numeric tag and its raw string value.
+message FixField {
+  uint32 tag = 1;
+  string value = 2;
+}
+
+// An ordered list of fields representing one complete FIX message.
+message FixMessage {
+  repeated FixField fields = 1;
+}

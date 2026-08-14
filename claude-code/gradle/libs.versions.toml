@@ -1,0 +1,14 @@
+[versions]
+protobuf = "4.35.1"
+protobufPlugin = "0.9.4"
+junit = "5.11.4"
+junitPlatform = "1.11.4"
+
+[libraries]
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
+
+[plugins]
+protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }

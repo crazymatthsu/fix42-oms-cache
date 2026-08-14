@@ -1,0 +1,182 @@
+syntax = "proto3";
+
+package fix42;
+
+import "enums.proto";
+
+option java_multiple_files = true;
+option java_package = "com.fix42.oms.proto";
+option java_outer_classname = "FixMessagesProto";
+
+// -----------------------------------------------------------------------------
+// Typed protobuf views of the 7 in-scope FIX 4.2 message types.
+//
+// These are a convenience/round-trip layer produced by the dictionary-driven
+// mappers (FixMessage <-> typed). They model the commonly-used fields and the
+// repeating groups of each message; anything not modeled remains available
+// losslessly on the generic FixMessage. The cache's state machine reads from
+// the generic FixMessage by tag, so these typed views never gate correctness.
+// -----------------------------------------------------------------------------
+
+// Standard FIX 4.2 message header (subset of commonly-present fields).
+message FixHeader {
+  string begin_string = 1;      // tag 8   e.g. "FIX.4.2"
+  uint32 body_length = 2;       // tag 9
+  string msg_type = 3;          // tag 35
+  string sender_comp_id = 4;    // tag 49
+  string target_comp_id = 5;    // tag 56
+  uint64 msg_seq_num = 6;       // tag 34
+  string sending_time = 7;      // tag 52
+  bool poss_dup_flag = 8;       // tag 43 ('Y')
+  bool poss_resend = 9;         // tag 97 ('Y')
+  string on_behalf_of_comp_id = 10; // tag 115
+  string deliver_to_comp_id = 11;   // tag 128
+}
+
+// Standard FIX 4.2 message trailer.
+message FixTrailer {
+  string signature = 1;         // tag 89
+  string check_sum = 2;         // tag 10 (3-char, zero padded)
+}
+
+// Repeating group NoContraBrokers(382) delimiter ContraBroker(375).
+message ContraBroker {
+  string contra_broker = 1;     // tag 375 (delimiter)
+  string contra_trader = 2;     // tag 337
+  double contra_trade_qty = 3;  // tag 437
+  string contra_trade_time = 4; // tag 438
+}
+
+// Repeating group NoAllocs(78) delimiter AllocAccount(79) (FIX 4.2 form).
+message Alloc {
+  string alloc_account = 1;     // tag 79 (delimiter)
+  double alloc_shares = 2;      // tag 80
+}
+
+// 35=D NewOrderSingle
+message NewOrderSingle {
+  FixHeader header = 1;
+  string cl_ord_id = 2;         // tag 11
+  string account = 3;           // tag 1
+  string handl_inst = 4;        // tag 21
+  string symbol = 5;            // tag 55
+  Side side = 6;                // tag 54
+  double order_qty = 7;         // tag 38
+  OrdType ord_type = 8;         // tag 40
+  double price = 9;             // tag 44
+  double stop_px = 10;          // tag 99
+  TimeInForce time_in_force = 11; // tag 59
+  string currency = 12;         // tag 15
+  string transact_time = 13;    // tag 60
+  string text = 14;             // tag 58
+  repeated Alloc allocs = 15;   // NoAllocs(78)
+  FixTrailer trailer = 16;
+}
+
+// 35=8 ExecutionReport
+message ExecutionReport {
+  FixHeader header = 1;
+  string order_id = 2;          // tag 37
+  string cl_ord_id = 3;         // tag 11
+  string orig_cl_ord_id = 4;    // tag 41
+  string exec_id = 5;           // tag 17
+  ExecTransType exec_trans_type = 6; // tag 20
+  string exec_ref_id = 7;       // tag 19
+  ExecType exec_type = 8;       // tag 150
+  OrdStatus ord_status = 9;     // tag 39
+  string account = 10;          // tag 1
+  string symbol = 11;           // tag 55
+  Side side = 12;               // tag 54
+  double order_qty = 13;        // tag 38
+  double price = 14;            // tag 44
+  double last_qty = 15;         // tag 32 (LastShares)
+  double last_px = 16;          // tag 31 (LastPx)
+  string last_market = 17;      // tag 30 (LastMkt)
+  double leaves_qty = 18;       // tag 151
+  double cum_qty = 19;          // tag 14
+  double avg_px = 20;           // tag 6
+  string currency = 21;         // tag 15
+  int32 ord_rej_reason = 22;    // tag 103
+  string text = 23;             // tag 58
+  string transact_time = 24;    // tag 60
+  repeated ContraBroker contra_brokers = 25; // NoContraBrokers(382)
+  FixTrailer trailer = 26;
+}
+
+// 35=9 OrderCancelReject
+message OrderCancelReject {
+  FixHeader header = 1;
+  string order_id = 2;          // tag 37
+  string cl_ord_id = 3;         // tag 11
+  string orig_cl_ord_id = 4;    // tag 41
+  OrdStatus ord_status = 5;     // tag 39
+  string account = 6;           // tag 1
+  CxlRejResponseTo cxl_rej_response_to = 7; // tag 434
+  int32 cxl_rej_reason = 8;     // tag 102
+  string text = 9;              // tag 58
+  string transact_time = 10;    // tag 60
+  FixTrailer trailer = 11;
+}
+
+// 35=F OrderCancelRequest
+message OrderCancelRequest {
+  FixHeader header = 1;
+  string orig_cl_ord_id = 2;    // tag 41
+  string cl_ord_id = 3;         // tag 11
+  string order_id = 4;          // tag 37
+  string account = 5;           // tag 1
+  string symbol = 6;            // tag 55
+  Side side = 7;                // tag 54
+  double order_qty = 8;         // tag 38
+  string transact_time = 9;     // tag 60
+  string text = 10;             // tag 58
+  FixTrailer trailer = 11;
+}
+
+// 35=G OrderCancelReplaceRequest
+message OrderCancelReplaceRequest {
+  FixHeader header = 1;
+  string orig_cl_ord_id = 2;    // tag 41
+  string cl_ord_id = 3;         // tag 11
+  string order_id = 4;          // tag 37
+  string account = 5;           // tag 1
+  string handl_inst = 6;        // tag 21
+  string symbol = 7;            // tag 55
+  Side side = 8;                // tag 54
+  double order_qty = 9;         // tag 38
+  OrdType ord_type = 10;        // tag 40
+  double price = 11;            // tag 44
+  double stop_px = 12;          // tag 99
+  TimeInForce time_in_force = 13; // tag 59
+  string currency = 14;         // tag 15
+  string transact_time = 15;    // tag 60
+  string text = 16;             // tag 58
+  repeated Alloc allocs = 17;   // NoAllocs(78)
+  FixTrailer trailer = 18;
+}
+
+// 35=H OrderStatusRequest
+message OrderStatusRequest {
+  FixHeader header = 1;
+  string cl_ord_id = 2;         // tag 11
+  string order_id = 3;          // tag 37
+  string account = 4;           // tag 1
+  string symbol = 5;            // tag 55
+  Side side = 6;                // tag 54
+  FixTrailer trailer = 7;
+}
+
+// 35=Q DontKnowTrade
+message DontKnowTrade {
+  FixHeader header = 1;
+  string order_id = 2;          // tag 37
+  string exec_id = 3;           // tag 17
+  string dk_reason = 4;         // tag 127
+  string symbol = 5;            // tag 55
+  Side side = 6;                // tag 54
+  double order_qty = 7;         // tag 38
+  double last_qty = 8;          // tag 32 (LastShares)
+  double last_px = 9;           // tag 31 (LastPx)
+  string text = 10;             // tag 58
+  FixTrailer trailer = 11;
+}

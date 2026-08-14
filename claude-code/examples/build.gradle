@@ -1,0 +1,13 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':oms-cache')
+    implementation project(':fix-codec')
+    implementation project(':fix-proto')
+}
+
+application {
+    mainClass = 'com.fix42.oms.examples.OrderStreamDemo'
+}

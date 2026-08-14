@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package fix42;
+
+import "fix.proto";
+import "enums.proto";
+
+option java_multiple_files = true;
+option java_package = "com.fix42.oms.proto";
+option java_outer_classname = "OrderStateProto";
+
+// -----------------------------------------------------------------------------
+// OrderState: the derived "latest state" of a single order (parent or child),
+// folded from every FIX message in its chain. This is the VALUE stored in the
+// cache. It carries both the current typed snapshot and the full ordered audit
+// trail (message_history) so any message can be re-joined for a given order.
+// -----------------------------------------------------------------------------
+message OrderState {
+  // ----- Identity / linkage -----
+  string order_id = 1;             // tag 37, assigned by sell-side (stable across the chain)
+  string cl_ord_id = 2;            // tag 11, the CURRENT client order id
+  string orig_cl_ord_id = 3;       // tag 41, most recent OrigClOrdID seen
+  repeated string cl_ord_id_history = 4; // every ClOrdID in the chain, in order
+  repeated string exec_ids = 5;    // tag 17, every ExecID applied (dedupe key)
+
+  // ----- Instrument / order terms -----
+  string account = 10;             // tag 1
+  string symbol = 11;              // tag 55
+  Side side = 12;                  // tag 54
+  OrdType ord_type = 13;           // tag 40
+  double order_qty = 14;           // tag 38 (current effective qty)
+  double price = 15;               // tag 44
+  double stop_px = 16;             // tag 99
+  TimeInForce time_in_force = 17;  // tag 59
+  string currency = 18;            // tag 15
+
+  // ----- Execution / lifecycle state -----
+  OrdStatus ord_status = 30;       // tag 39
+  ExecType last_exec_type = 31;    // tag 150 of the most recent ExecutionReport
+  double cum_qty = 32;             // tag 14
+  double leaves_qty = 33;          // tag 151
+  double avg_px = 34;              // tag 6
+  double last_qty = 35;            // tag 32 (LastShares) of the most recent fill
+  double last_px = 36;             // tag 31 (LastPx) of the most recent fill
+  string last_market = 37;         // tag 30 (LastMkt)
+
+  // ----- Reject / free text -----
+  string text = 40;                // tag 58
+  int32 ord_rej_reason = 41;       // tag 103
+  int32 cxl_rej_reason = 42;       // tag 102
+
+  // ----- Parent / child linkage -----
+  string parent_order_id = 50;         // empty if this is a top-level/parent order
+  repeated string child_order_ids = 51;
+  bool is_parent = 52;
+
+  // ----- In-flight request tracking -----
+  // Maps a pending cancel/replace REQUEST's ClOrdID(11) -> the OrdStatus that was
+  // in effect just before that request moved the order to PENDING_CANCEL /
+  // PENDING_REPLACE. An OrderCancelReject(35=9) echoing that ClOrdID reverts to it.
+  // Keyed per-request so several in-flight F/G do not clobber one another.
+  map<string, int32> pending_prior_status = 55; // value = OrdStatus enum number
+  // ExecIDs of executions that were later busted/corrected (ExecTransType 1/2),
+  // retained for audit; cum_qty/avg_px still track the venue's restated snapshot.
+  repeated string busted_exec_ids = 56;
+
+  // ----- Audit / bookkeeping -----
+  int64 first_seen_epoch_millis = 60;
+  int64 last_update_epoch_millis = 61;
+  string last_msg_type = 62;       // tag 35 of the most recent message applied
+  uint64 update_count = 63;        // number of messages folded into this state
+
+  // Full ordered audit trail: every original message applied to this order,
+  // in arrival order. Stored parsed (the raw string is reconstructable via the
+  // serializer). May be capped by policy; see OrderCache config.
+  repeated FixMessage message_history = 70;
+}

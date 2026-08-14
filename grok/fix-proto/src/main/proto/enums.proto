@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package fix42.oms;
+
+option java_package = "com.fix42.oms.proto";
+option java_multiple_files = true;
+option java_outer_classname = "FixEnumsProto";
+
+// Numeric values are the ASCII code of the FIX 4.2 character.
+
+enum Side {
+  SIDE_UNKNOWN = 0;
+  SIDE_BUY = 49;                 // 1
+  SIDE_SELL = 50;                // 2
+  SIDE_BUY_MINUS = 51;           // 3
+  SIDE_SELL_PLUS = 52;           // 4
+  SIDE_SELL_SHORT = 53;          // 5
+  SIDE_SELL_SHORT_EXEMPT = 54;   // 6
+  SIDE_UNDISCLOSED = 55;         // 7
+  SIDE_CROSS = 56;               // 8
+  SIDE_CROSS_SHORT = 57;         // 9
+}
+
+enum OrdType {
+  ORD_TYPE_UNKNOWN = 0;
+  ORD_TYPE_MARKET = 49;          // 1
+  ORD_TYPE_LIMIT = 50;           // 2
+  ORD_TYPE_STOP = 51;            // 3
+  ORD_TYPE_STOP_LIMIT = 52;      // 4
+  ORD_TYPE_MARKET_ON_CLOSE = 53; // 5
+  ORD_TYPE_PEGGED = 80;          // P
+}
+
+enum TimeInForce {
+  TIF_UNKNOWN = 0;
+  TIF_DAY = 48;                  // 0
+  TIF_GTC = 49;                  // 1
+  TIF_OPG = 50;                  // 2
+  TIF_IOC = 51;                  // 3
+  TIF_FOK = 52;                  // 4
+  TIF_GTX = 53;                  // 5
+  TIF_GTD = 54;                  // 6
+}
+
+enum OrdStatus {
+  ORD_STATUS_UNKNOWN = 0;
+  ORD_STATUS_NEW = 48;                 // 0
+  ORD_STATUS_PARTIALLY_FILLED = 49;    // 1
+  ORD_STATUS_FILLED = 50;              // 2
+  ORD_STATUS_DONE_FOR_DAY = 51;        // 3
+  ORD_STATUS_CANCELED = 52;            // 4
+  ORD_STATUS_REPLACED = 53;            // 5
+  ORD_STATUS_PENDING_CANCEL = 54;      // 6
+  ORD_STATUS_STOPPED = 55;             // 7
+  ORD_STATUS_REJECTED = 56;            // 8
+  ORD_STATUS_SUSPENDED = 57;           // 9
+  ORD_STATUS_PENDING_NEW = 65;         // A
+  ORD_STATUS_CALCULATED = 66;          // B
+  ORD_STATUS_EXPIRED = 67;             // C
+  ORD_STATUS_ACCEPTED_FOR_BIDDING = 68;// D
+  ORD_STATUS_PENDING_REPLACE = 69;     // E
+}
+
+enum ExecType {
+  EXEC_TYPE_UNKNOWN = 0;
+  EXEC_TYPE_NEW = 48;                  // 0
+  EXEC_TYPE_PARTIAL_FILL = 49;         // 1
+  EXEC_TYPE_FILL = 50;                 // 2
+  EXEC_TYPE_DONE_FOR_DAY = 51;         // 3
+  EXEC_TYPE_CANCELED = 52;             // 4
+  EXEC_TYPE_REPLACE = 53;              // 5
+  EXEC_TYPE_PENDING_CANCEL = 54;       // 6
+  EXEC_TYPE_STOPPED = 55;              // 7
+  EXEC_TYPE_REJECTED = 56;             // 8
+  EXEC_TYPE_SUSPENDED = 57;            // 9
+  EXEC_TYPE_PENDING_NEW = 65;          // A
+  EXEC_TYPE_CALCULATED = 66;           // B
+  EXEC_TYPE_EXPIRED = 67;              // C
+  EXEC_TYPE_RESTATED = 68;             // D
+  EXEC_TYPE_PENDING_REPLACE = 69;      // E
+}
+
+enum ExecTransType {
+  EXEC_TRANS_TYPE_UNKNOWN = 0;
+  EXEC_TRANS_TYPE_NEW = 48;            // 0
+  EXEC_TRANS_TYPE_CANCEL = 49;         // 1
+  EXEC_TRANS_TYPE_CORRECT = 50;        // 2
+  EXEC_TRANS_TYPE_STATUS = 51;         // 3
+}
+
+enum CxlRejResponseTo {
+  CXL_REJ_RESPONSE_TO_UNKNOWN = 0;
+  CXL_REJ_RESPONSE_TO_CANCEL = 49;     // 1
+  CXL_REJ_RESPONSE_TO_REPLACE = 50;    // 2
+}
+
+enum DKReason {
+  DK_REASON_UNKNOWN = 0;
+  DK_REASON_UNKNOWN_SYMBOL = 65;       // A
+  DK_REASON_WRONG_SIDE = 66;           // B
+  DK_REASON_QUANTITY_EXCEEDS_ORDER = 67; // C
+  DK_REASON_NO_MATCHING_ORDER = 68;    // D
+  DK_REASON_PRICE_EXCEEDS_LIMIT = 69;  // E
+  DK_REASON_OTHER = 90;                // Z
+}
+
+enum HandlInst {
+  HANDL_INST_UNKNOWN = 0;
+  HANDL_INST_AUTO_PRIVATE = 49;        // 1
+  HANDL_INST_AUTO_PUBLIC = 50;         // 2
+  HANDL_INST_MANUAL = 51;              // 3
+}

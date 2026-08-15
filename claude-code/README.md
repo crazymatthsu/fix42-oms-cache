@@ -16,7 +16,11 @@ whole order lifecycle, plus a **FIX ⇄ protobuf** codec.
 - **State-change listener SPI** (`OrderStateListener`): every latest-state change (including
   parent roll-ups) is delivered in processing order — the integration point for publishing
   to AMPS SOW topics, Kafka, or any downstream store.
-- Zero runtime dependencies beyond `protobuf-java`.
+- Optional **Parquet archive** (`:oms-parquet`): batched DuckDB writers put the raw FIX
+  messages and every order-state change on disk as partitioned Parquet
+  (`YYYY/MM/DD/account/symbol` by default), for intraday queries from Deephaven or DuckDB,
+  end-of-day small-file compaction, and an overnight move to S3.
+- Zero runtime dependencies beyond `protobuf-java` (the Parquet module adds DuckDB).
 
 See **[docs/00-overview.md](docs/00-overview.md)** for the authoritative design and the answers
 to every question in [TODO.md](TODO.md).
@@ -29,13 +33,15 @@ to every question in [TODO.md](TODO.md).
 | `:fix-codec` | FIX parser/serializer, embedded FIX 4.2 dictionary, enum⇄code, typed mappers |
 | `:oms-cache` | order state machine, in-memory cache + indexes, parent linkage, `OmsCache` API |
 | `:oms-persist` | crash recovery: write-ahead journal + atomic snapshots (`PersistentOrderCache`) |
+| `:oms-parquet` | DuckDB Parquet archive: partitioned datasets, EOD compaction, S3 move (`ParquetArchive`) |
 | `:examples` | runnable end-to-end demo |
 
 ## Quick start
 
 ```bash
-./gradlew build          # compile + run all 95 tests
-./gradlew :examples:run   # run the end-to-end demo
+./gradlew build           # compile + run all 216 tests
+./gradlew :examples:run    # run the end-to-end demo
+./gradlew :examples:run -PmainClass=com.fix42.oms.examples.ParquetArchiveDemo   # Parquet archive demo
 ```
 
 ## Usage
@@ -77,6 +83,35 @@ try (PersistentOrderCache cache = PersistentOrderCache.open(Path.of("/var/oms/jo
 // the recovered state equals the pre-crash state exactly.
 ```
 
+### Parquet archive
+
+```java
+import com.fix42.oms.parquet.*;
+
+ParquetArchive archive = ParquetArchive.open(ParquetArchiveConfig.defaults(Path.of("/data/oms")));
+
+// wrap() captures every raw message; orderStateListener() captures every state change
+OmsCache cache = new OmsCache(archive.wrap(
+        new InMemoryOrderCache(DefaultParentLinkResolver.create(),
+                               CacheConfig.defaults(),
+                               archive.orderStateListener())));
+
+cache.process("8=FIX.4.2|35=D|11=ORD1|1=ACC|55=IBM|54=1|38=1000|40=2|44=185.50|");
+archive.flush();
+// /data/oms/fix_messages/2026/08/14/ACC/IBM/fix_messages-…-0.parquet
+// /data/oms/order_state/2026/08/14/ACC/IBM/order_state-…-1.parquet
+```
+
+Query it intraday with anything that reads Parquet, then compact and move the finished day
+to S3:
+
+```java
+try (EndOfDayArchiver eod = new EndOfDayArchiver(config, EndOfDayPolicy.moveToObjectStore(),
+        new DuckDbS3ObjectStore(S3Config.of("oms-archive", "prod", "us-east-1"), config.duckDb()))) {
+    eod.run(LocalDate.now(config.partitionZone()).minusDays(1));
+}
+```
+
 ## Requirements
 
 Java 23, Gradle 9.2.1 (a wrapper is included: use `./gradlew`).
@@ -92,3 +127,4 @@ Java 23, Gradle 9.2.1 (a wrapper is included: use `./gradlew`).
 - [06 — Public API & Order-State Machine](docs/06-api-and-state-machine.md)
 - [07 — Persistence & Crash Recovery](docs/07-persistence-and-recovery.md)
 - [08 — AMPS Integration & State Distribution](docs/08-amps-integration.md)
+- [09 — DuckDB Parquet Archive (intraday & historical query)](docs/09-parquet-archive.md)

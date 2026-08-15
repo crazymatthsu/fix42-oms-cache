@@ -6,8 +6,11 @@ dependencies {
     implementation project(':oms-cache')
     implementation project(':fix-codec')
     implementation project(':fix-proto')
+    implementation project(':oms-parquet')
 }
 
 application {
-    mainClass = 'com.fix42.oms.examples.OrderStreamDemo'
+    // ./gradlew :examples:run                                              -> OrderStreamDemo
+    // ./gradlew :examples:run -PmainClass=…examples.ParquetArchiveDemo     -> the Parquet demo
+    mainClass = providers.gradleProperty('mainClass').getOrElse('com.fix42.oms.examples.OrderStreamDemo')
 }

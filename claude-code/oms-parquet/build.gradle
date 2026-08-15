@@ -1,0 +1,10 @@
+dependencies {
+    // OrderStateChange / OrderCache are on this module's public surface (listener + decorator).
+    api project(':oms-cache')
+    // Serializing a FixMessage back to its raw wire form for the raw_fix column.
+    implementation project(':fix-codec')
+
+    // DuckDB is an implementation detail: it writes and compacts the Parquet files.
+    // The artifact bundles the native library for the host platform.
+    implementation libs.duckdb.jdbc
+}
